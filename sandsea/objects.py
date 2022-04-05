@@ -129,7 +129,7 @@ class Point:
 		else:
 			raise TypeError("Point arguments must be three integers or a Vector.")
 
-    def translate(self, dx, dy, dz):
+	def translate(self, dx, dy, dz):
 		self.x += dx
 		self.y += dy
 		self.z += dz
@@ -138,7 +138,7 @@ class Point:
 
 		return self
 
-    def rotate(self, dx, dy, dz, centerPoint=None:
+	def rotate(self, dx, dy, dz, centerPoint=None:
 		if centerPoint != None:
 			centeredPoint = [centerPoint.x, centerPoint.y, centerPoint.z]
 		else:
@@ -239,11 +239,11 @@ class Line:
 		self.__init__(self.origin.rotate(dx, dy, dz, centerPoint), self.pointOnRay.rotate(dx, dy, dz, centerPoint))
 		return self
 
-    def checkCollision(self, object):
+	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
 			return ((object.x - self.point1.x) / self.directionalVector.x) == ((object.y - self.point1.y) / self.directionalVector.y) == ((object.z - self.point1.z) / self.directionalVector.z)
 
-        if type(object) == type(self):
+        	if type(object) == type(self):
 			resultSegmentPoint1 = Point(0, 0, 0)
 			resultSegmentPoint2 = Point(0, 0, 0)
 
@@ -321,7 +321,7 @@ class Ray:
 		pass
 
 class Triangle:
-    def __init__(self, point1, point2, point3):
+	def __init__(self, point1, point2, point3):
 		self.point1 = point1
 		self.point2 = point2
 		self.point3 = point3
@@ -338,15 +338,15 @@ class Triangle:
 		self.area = self.semiperimiter * (self.semiperimiter - self.length_12) * (self.semiperimiter - self.length_23) * (self.semiperimiter - self.length_13)
 		self.centroid = Point((self.point1.x + self.point2.x + self.point3.x) / 3, (self.point1.y + self.point2.y + self.point3.y) / 3, (self.point1.z + self.point2.z + self.point3.z) / 3)
 
-    def translate(self, dx, dy, dz):
+	def translate(self, dx, dy, dz):
 		self.__init__(self.point1.translate(dx, dy, dz), self.point2.translate(dx, dy, dz), self.point3.translate(dx, dy, dz))
 		return self
 
-    def rotate(self, dx, dy, dz, centerPoint=None):
+	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.point1.rotate(dx, dy, dz, centerPoint), self.point2.rotate(dx, dy, dz, centerPoint), self.point3.rotate(dx, dy, dz, centerPoint))
 		return self
 
-    def checkCollision(self, object):
+	def checkCollision(self, object):
 		if type(object) == type(point):
 			angle_12 = Angle(object, self.point1, self.point2)
 			angle_13 = Angle(object, self.point1, self.point3)
@@ -361,16 +361,25 @@ class Triangle:
 		elif type(object) == type(Line(Point(0, 0, 0), Point(0, 0, 1))):
 			return False
 
-        elif type(object) == type(self):
-			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point2)): return True
-			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point3)): return True
-			if Line(self.point1, self.point2).checkCollision(Line(object.point2, object.point3)): return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point2)): return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point3)): return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point2, object.point3)): return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point2)): return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point3)): return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point2, object.point3)): return True
+		elif type(object) == type(self):
+			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point2)): 
+		   return True
+			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point3)): 
+		   return True
+			if Line(self.point1, self.point2).checkCollision(Line(object.point2, object.point3)): 
+		   return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point2)): 
+		   return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point3)): 
+		   return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point2, object.point3)): 
+		   return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point2)): 
+		   return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point3)): 
+		   return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point2, object.point3)): 
+		   return True
 
 			inTriangle = True
 			inTriangle = inTriangle and self.checkCollision(object.point1)
@@ -406,6 +415,20 @@ class Sphere:
 			return self.center.distance(object) <= self.radius
 
 		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
-			collided = True
+			collided = False
+			collided = collided or self.center.distance(object.point1) <= self.radius
+		   	collided = collided or self.center.distance(object.point2) <= self.radius
+		   	collided = collided or self.center.distance(object.point3) <= self.radius
+		   	t12 = Triangle(self.center, object.point1, object.point2)
+			t13 = Triangle(self.center, object.point1, object.point3)
+		   	t23 = Triangle(self.center, object.point2, object.point3)
+		   	collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
+		   	collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
+		   	collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
+		  	
+		   	return collided
+		   
+class Cuboid:
+	def __init__(self, corner1, arg2):
+		if type(arg2) == type(Point(0, 0, 0)):
 			
-			  
