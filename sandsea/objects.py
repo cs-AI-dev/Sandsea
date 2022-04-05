@@ -177,7 +177,7 @@ class Point:
 
 	def distance(self, object):
 		if type(object) == type(self):
-			return math.sqrt(((object.x - self.x) ** 2) + ((object.y - self.y) ** 2) + ((object.z - self.z) ** 2))
+			return math.sqrt(((object.x - self.x) ** 2) + ((object.y - self.y) ** 2) + ((object.z - self.z) ** 2)))
 		else:
 			vec3 d = (C - B) / C.distance(B)
 			vec3 v = A - B
@@ -196,7 +196,7 @@ class Angle:
 
 		endp1.translate(center.x, center.y, center.z)
 		endp2.translate(center.x, center.y, center.z)
-
+		
 		self.angle = math.acos((ep1.x * ep2.x + ep1.y * ep2.y + ep1.z * ep2.z) / (sqrt((ep1.x ** 2) + (ep1.y ** 2) + (ep1.z ** 2)) * sqrt((ep2.x ** 2) + (ep2.y ** 2) + (ep2.z ** 2))))
 
 	def translate(self, dx, dy, dz):
@@ -431,4 +431,31 @@ class Sphere:
 class Cuboid:
 	def __init__(self, corner1, arg2):
 		if type(arg2) == type(Point(0, 0, 0)):
+			# Close (1) / Far (2) - X
+			# Bottom (1) / Top (2) - Y
+			# Left (1) / Right (2) - Z
+			self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
+			self.far_bottom_left = Point(arg2.x, corner1.y, corner1.z)
+			self.close_top_left = Point(corner1.x, arg2.y, corner1.z)
+			self.far_top_left = Point(arg2.x, arg2.y, corner1.z)
+			self.close_bottom_right = Point(corner1.x, corner1.y, arg2.z)
+			self.far_bottom_right = Point(arg2.x, corner1.y, arg2.z)
+			self.close_top_right = Point(corner1.x, arg2.y, arg2.z)
+			self.far_top_right = Point(arg2.x, arg2.y, arg2.z)
+		elif type(arg2) == type(Vector(0, 0, 0)):
+			self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
+			self.far_bottom_left = Point(corner1.x + arg2.x, corner1.y, corner1.z)
+			self.close_top_left = Point(corner1.x, corner1.y + arg2.y, corner1.z)
+			self.far_top_left = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z)
+			self.close_bottom_right = Point(corner1.x, corner1.y, corner1.z + arg2.z)
+			self.far_bottom_right = Point(corner1.x + arg2.x, corner1.y, corner1.z + arg2.z)
+			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
+			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
 			
+		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
+		self.volume *= self.close_bottom_left.distance(self.close_top_left)
+		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
+			
+	def translate(self, dx, dy, dz):
+		self.__init__(corner1.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
+		return self
