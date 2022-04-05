@@ -128,6 +128,9 @@ class Point:
 				raise TypeError("Point arguments must be three integers or a Vector.")
 		else:
 			raise TypeError("Point arguments must be three integers or a Vector.")
+			
+	def __iter__(self):
+		return [self.x, self.y, self.z]
 
 	def translate(self, dx, dy, dz):
 		self.x += dx
@@ -338,6 +341,9 @@ class Triangle:
 		self.area = self.semiperimiter * (self.semiperimiter - self.length_12) * (self.semiperimiter - self.length_23) * (self.semiperimiter - self.length_13)
 		self.centroid = Point((self.point1.x + self.point2.x + self.point3.x) / 3, (self.point1.y + self.point2.y + self.point3.y) / 3, (self.point1.z + self.point2.z + self.point3.z) / 3)
 
+	def __iter__(self):
+		return [self.point1, self.point2, self.point3]
+	
 	def translate(self, dx, dy, dz):
 		self.__init__(self.point1.translate(dx, dy, dz), self.point2.translate(dx, dy, dz), self.point3.translate(dx, dy, dz))
 		return self
@@ -363,23 +369,23 @@ class Triangle:
 
 		elif type(object) == type(self):
 			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point2)): 
-		   return True
+				return True
 			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point3)): 
-		   return True
+		   		return True
 			if Line(self.point1, self.point2).checkCollision(Line(object.point2, object.point3)): 
-		   return True
+		   		return True
 			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point2)): 
-		   return True
+		   		return True
 			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point3)): 
-		   return True
+		   		return True
 			if Line(self.point1, self.point3).checkCollision(Line(object.point2, object.point3)): 
-		   return True
+		   		return True
 			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point2)): 
-		   return True
+		   		return True
 			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point3)): 
-		   return True
+		   		return True
 			if Line(self.point2, self.point3).checkCollision(Line(object.point2, object.point3)): 
-		   return True
+		   		return True
 
 			inTriangle = True
 			inTriangle = inTriangle and self.checkCollision(object.point1)
@@ -455,7 +461,42 @@ class Cuboid:
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
+		
+		self.rotation = Vector(0, 0, 0)
+		
+	def __iter__(self):
+		return [
+			self.close_bottom_left, 
+			self.far_bottom_left,
+		        self.close_top_left,
+		       	self.far_top_left,
+		        self.close_bottom_right,
+		       	self.far_bottom_right,
+		        self.close_top_right,
+		       	self.far_top_right
+		]
 			
 	def translate(self, dx, dy, dz):
-		self.__init__(corner1.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
+		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
 		return self
+	
+	def rotate(self, dx, dy, dz, centerPoint=None):
+		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
+		self.rotation.addVector(Vector(dx, dy, dz))
+		return self
+	
+	def checkCollision(self, object):
+		if type(object) == type(Point(0, 0, 0)):
+			tp = object.rotate(-self.rotation.x, -self.rotation.y, -self.rotation.z, Point(0, 0, 0))
+			collided = True
+			collided = collided and (min([p.x for p in iter(self)] <= tp.x <= max([p.x for p in iter(self)])))
+			collided = collided and (min([p.y for p in iter(self)] <= tp.y <= max([p.y for p in iter(self)])))
+			collided = collided and (min([p.z for p in iter(self)] <= tp.z <= max([p.z for p in iter(self)])))
+			return collided
+		
+		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
+			collided = False
+			collided = collided or self.checkCollision(object.point1)
+			collided = collided or self.checkCollision(object.point2)
+			collided = collided or self.checkCollision(object.point3)
+			return collided
