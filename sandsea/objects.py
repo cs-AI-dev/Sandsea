@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import scipy
 
 setting = {"lowerCollisionThreshold": 1e-16}
 
@@ -649,3 +650,69 @@ class Ball:
 			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
 
 			return collided
+
+class Cylinder:
+	def __init__(self, centerPoint, radius, height, material):
+		self.centerPoint = centerPoint
+		self.radius = radius
+		self.height = height
+		self.material = material
+		self.volume = math.pi * (self.radius ^ 2) * self.height 
+		self.mass = self.volume * self.material.density
+		self.motion = Vector(0, 0, 0)
+		
+		self.rotationVector = Vector(0, 0, 0)
+		
+	def translate(self, dx, dy, dz):
+		self.center.translate(dx, dy, dz)
+		return self
+	
+	def rotate(self, dx, dy, dz, centerPoint):
+		self.center.rotate(dx, dy, dz, centerPoint)
+		self.rotationVector.addVector(dx, dy, dz)
+		return self
+		
+	def checkCollision(self, object):
+		rv = self.rotationVector
+		self.rotate(-self.rotationVector.x, -self.rotationVector.y, -self.rotationVector.z)
+		if type(object) == type(Point(0, 0, 0)):
+			return self.centerPoint.distance(object) <= self.radius and self.center.z <= object.z <= self.center.z + self.height
+		elif type(object) == type(Triangle(0, 0, 0)):
+			collided = False
+			collided = collided or self.center.distance(object.point1) <= self.radius
+			collided = collided or self.center.distance(object.point2) <= self.radius
+			collided = collided or self.center.distance(object.point3) <= self.radius
+			t12 = Triangle(self.center, object.point1, object.point2)
+			t13 = Triangle(self.center, object.point1, object.point3)
+			t23 = Triangle(self.center, object.point2, object.point3)
+			collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
+			collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
+			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
+			
+			zrange = False
+			zrange = zrange or self.center.z <= object.point1.z <= self.center.z + self.height
+			zrange = zrange or self.center.z <= object.point2.z <= self.center.z + self.height
+			zrange = zrange or self.center.z <= object.point3.z <= self.center.z + self.height
+			
+			return collided and zrange
+		self.rotate(rv.x, rv.y, rv.z)
+		
+class Lowpoly:
+	def __init__(self, material, *triangles):
+		self.triangles = triangles
+		self.surfaceArea = sum([tri.area for tri in self.triangles])
+		self.volume = scipy.spatial.ConvexHull([[x for x in iter(tri)] for tri in self.triangles]).volume
+		self.material = material
+		self.mass = self.volume * self.material.density
+		self.movement = Vector(0, 0, 0)
+		
+	def translate(self, dx, dy, dz):
+		[tri.translate(dx, dy, dz) for tri in self.triangles]
+		return self
+	
+	def rotate(self, dx, dy, dz, centerPoint):
+		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
+		return self
+	
+	def checkCollision(self, object):
+		return True
