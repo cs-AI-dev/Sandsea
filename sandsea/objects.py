@@ -21,6 +21,9 @@ class Vector:
 		self.net = x + y + z
 		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
+	def __init__(self):
+		return [self.x, self.y, self.z]
+
 	def addVector(self, vector):
 		self.x = self.x + vector.x
 		self.y = self.y + vector.y
@@ -128,7 +131,7 @@ class Point:
 				raise TypeError("Point arguments must be three integers or a Vector.")
 		else:
 			raise TypeError("Point arguments must be three integers or a Vector.")
-			
+
 	def __iter__(self):
 		return [self.x, self.y, self.z]
 
@@ -141,7 +144,7 @@ class Point:
 
 		return self
 
-	def rotate(self, dx, dy, dz, centerPoint=None:
+	def rotate(self, dx, dy, dz, centerPoint=None):
 		if centerPoint != None:
 			centeredPoint = [centerPoint.x, centerPoint.y, centerPoint.z]
 		else:
@@ -180,13 +183,14 @@ class Point:
 
 	def distance(self, object):
 		if type(object) == type(self):
-			return math.sqrt(((object.x - self.x) ** 2) + ((object.y - self.y) ** 2) + ((object.z - self.z) ** 2)))
+			return math.sqrt(((object.x - self.x) ** 2) + ((object.y - self.y) ** 2) + ((object.z - self.z) ** 2))
 		else:
-			vec3 d = (C - B) / C.distance(B)
-			vec3 v = A - B
-			double t = v.dot(d)
-			vec3 P = B + t * d
-			return P.distance(A)
+			# vec3 d = (C - B) / C.distance(B)
+			# vec3 v = A - B
+			# double t = v.dot(d)
+			# vec3 P = B + t * d
+			# return P.distance(A)
+			pass
 
 class Angle:
 	def __init__(self, center, endp1, endp2):
@@ -199,7 +203,7 @@ class Angle:
 
 		endp1.translate(center.x, center.y, center.z)
 		endp2.translate(center.x, center.y, center.z)
-		
+
 		self.angle = math.acos((ep1.x * ep2.x + ep1.y * ep2.y + ep1.z * ep2.z) / (sqrt((ep1.x ** 2) + (ep1.y ** 2) + (ep1.z ** 2)) * sqrt((ep2.x ** 2) + (ep2.y ** 2) + (ep2.z ** 2))))
 
 	def translate(self, dx, dy, dz):
@@ -246,50 +250,50 @@ class Line:
 		if type(object) == type(Point(0, 0, 0)):
 			return ((object.x - self.point1.x) / self.directionalVector.x) == ((object.y - self.point1.y) / self.directionalVector.y) == ((object.z - self.point1.z) / self.directionalVector.z)
 
-        	if type(object) == type(self):
-			resultSegmentPoint1 = Point(0, 0, 0)
-			resultSegmentPoint2 = Point(0, 0, 0)
+			if type(object) == type(self):
+				resultSegmentPoint1 = Point(0, 0, 0)
+				resultSegmentPoint2 = Point(0, 0, 0)
 
-			p1 = pointToVector(self.point1);
-			p2 = pointToVector(self.point2);
-			p3 = pointToVector(object.point1);
-			p4 = pointToVector(object.point2);
-			p13 = p1
-			p13.subtractVector(p3)
-			p43 = p4
-			p43.subtractVector(p3)
+				p1 = pointToVector(self.point1);
+				p2 = pointToVector(self.point2);
+				p3 = pointToVector(object.point1);
+				p4 = pointToVector(object.point2);
+				p13 = p1
+				p13.subtractVector(p3)
+				p43 = p4
+				p43.subtractVector(p3)
 
-			if p43.length ** 2 < setting["lowerCollisionThreshold"]:
-				return False
+				if p43.length ** 2 < setting["lowerCollisionThreshold"]:
+					return False
 
-			p21 = p2
-			p21.subtractVector(p1)
-			if p21.length ** 2 < setting["lowerCollisionThreshold"]:
-				return False
+				p21 = p2
+				p21.subtractVector(p1)
+				if p21.length ** 2 < setting["lowerCollisionThreshold"]:
+					return False
 
-			d1343 = p13.x * p43.x + p13.y * p43.y + p13.z * p43.z
-			d4321 = p43.x * p21.x + p43.y * p21.y + p43.z * p21.z
-			d1321 = p13.x * p21.x + p13.y * p21.y + p13.z * p21.z
-			d4343 = p43.x * p43.x + p43.y * p43.y + p43.z * p43.z
-			d2121 = p21.x * p21.x + p21.y * p21.y + p21.z * p21.z
+				d1343 = p13.x * p43.x + p13.y * p43.y + p13.z * p43.z
+				d4321 = p43.x * p21.x + p43.y * p21.y + p43.z * p21.z
+				d1321 = p13.x * p21.x + p13.y * p21.y + p13.z * p21.z
+				d4343 = p43.x * p43.x + p43.y * p43.y + p43.z * p43.z
+				d2121 = p21.x * p21.x + p21.y * p21.y + p21.z * p21.z
 
-			denom = d2121 * d4343 - d4321 * d4321;
-			if abs(denom) < setting["lowerCollisionThreshold"]:
-				return False
+				denom = d2121 * d4343 - d4321 * d4321;
+				if abs(denom) < setting["lowerCollisionThreshold"]:
+					return False
 
-			numer = d1343 * d4321 - d1321 * d4343
+				numer = d1343 * d4321 - d1321 * d4343
 
-			mua = numer / denom
-			mub = (d1343 + d4321 * mua) / d4343
+				mua = numer / denom
+				mub = (d1343 + d4321 * mua) / d4343
 
-			resultSegmentPoint1.addx(p1.x + mua * p21.x)
-			resultSegmentPoint1.addy(p1.y + mua * p21.y)
-			resultSegmentPoint1.addz(p1.z + mua * p21.z)
-			resultSegmentPoint2.addx(p3.x + mub * p43.x)
-			resultSegmentPoint2.addy(p3.y + mub * p43.y)
-			resultSegmentPoint2.addz(p3.z + mub * p43.z)
+				resultSegmentPoint1.addx(p1.x + mua * p21.x)
+				resultSegmentPoint1.addy(p1.y + mua * p21.y)
+				resultSegmentPoint1.addz(p1.z + mua * p21.z)
+				resultSegmentPoint2.addx(p3.x + mub * p43.x)
+				resultSegmentPoint2.addy(p3.y + mub * p43.y)
+				resultSegmentPoint2.addz(p3.z + mub * p43.z)
 
-			return resultSegmentPoint1.distance(resultSegmentPoint2) < setting["lowerCollisionThreshold"]
+				return resultSegmentPoint1.distance(resultSegmentPoint2) < setting["lowerCollisionThreshold"]
 
 class Ray:
 	def __init__(self, origin, arg):
@@ -343,7 +347,7 @@ class Triangle:
 
 	def __iter__(self):
 		return [self.point1, self.point2, self.point3]
-	
+
 	def translate(self, dx, dy, dz):
 		self.__init__(self.point1.translate(dx, dy, dz), self.point2.translate(dx, dy, dz), self.point3.translate(dx, dy, dz))
 		return self
@@ -363,29 +367,29 @@ class Triangle:
 			gamma = Angle(object, self.point2, self.point2).angle / Triangle(object, self.point2, self.point2).area
 
 			return (alpha + beta + gamma == 1) and (0 < alpha < 1) and (0 < beta < 1) and (0 < gamma < 1)
-			   
+
 		elif type(object) == type(Line(Point(0, 0, 0), Point(0, 0, 1))):
 			return False
 
 		elif type(object) == type(self):
-			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point2)): 
+			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point2)):
 				return True
-			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point3)): 
-		   		return True
-			if Line(self.point1, self.point2).checkCollision(Line(object.point2, object.point3)): 
-		   		return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point2)): 
-		   		return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point3)): 
-		   		return True
-			if Line(self.point1, self.point3).checkCollision(Line(object.point2, object.point3)): 
-		   		return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point2)): 
-		   		return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point3)): 
-		   		return True
-			if Line(self.point2, self.point3).checkCollision(Line(object.point2, object.point3)): 
-		   		return True
+			if Line(self.point1, self.point2).checkCollision(Line(object.point1, object.point3)):
+				return True
+			if Line(self.point1, self.point2).checkCollision(Line(object.point2, object.point3)):
+				return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point2)):
+				return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point1, object.point3)):
+				return True
+			if Line(self.point1, self.point3).checkCollision(Line(object.point2, object.point3)):
+				return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point2)):
+				return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point1, object.point3)):
+				return True
+			if Line(self.point2, self.point3).checkCollision(Line(object.point2, object.point3)):
+				return True
 
 			inTriangle = True
 			inTriangle = inTriangle and self.checkCollision(object.point1)
@@ -423,17 +427,17 @@ class Sphere:
 		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
 			collided = False
 			collided = collided or self.center.distance(object.point1) <= self.radius
-		   	collided = collided or self.center.distance(object.point2) <= self.radius
-		   	collided = collided or self.center.distance(object.point3) <= self.radius
-		   	t12 = Triangle(self.center, object.point1, object.point2)
+			collided = collided or self.center.distance(object.point2) <= self.radius
+			collided = collided or self.center.distance(object.point3) <= self.radius
+			t12 = Triangle(self.center, object.point1, object.point2)
 			t13 = Triangle(self.center, object.point1, object.point3)
-		   	t23 = Triangle(self.center, object.point2, object.point3)
-		   	collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
-		   	collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
-		   	collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
-		  	
-		   	return collided
-		   
+			t23 = Triangle(self.center, object.point2, object.point3)
+			collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
+			collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
+			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
+
+			return collided
+
 class Cuboid:
 	def __init__(self, corner1, arg2):
 		if type(arg2) == type(Point(0, 0, 0)):
@@ -457,34 +461,34 @@ class Cuboid:
 			self.far_bottom_right = Point(corner1.x + arg2.x, corner1.y, corner1.z + arg2.z)
 			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
 			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
-			
+
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
-		
+
 		self.rotation = Vector(0, 0, 0)
-		
+
 	def __iter__(self):
 		return [
-			self.close_bottom_left, 
+			self.close_bottom_left,
 			self.far_bottom_left,
-		        self.close_top_left,
-		       	self.far_top_left,
-		        self.close_bottom_right,
-		       	self.far_bottom_right,
-		        self.close_top_right,
-		       	self.far_top_right
+				self.close_top_left,
+				self.far_top_left,
+				self.close_bottom_right,
+				self.far_bottom_right,
+				self.close_top_right,
+				self.far_top_right
 		]
-			
+
 	def translate(self, dx, dy, dz):
 		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
 		return self
-	
+
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
 		self.rotation.addVector(Vector(dx, dy, dz))
 		return self
-	
+
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
 			tp = object.rotate(-self.rotation.x, -self.rotation.y, -self.rotation.z, Point(0, 0, 0))
@@ -493,7 +497,7 @@ class Cuboid:
 			collided = collided and (min([p.y for p in iter(self)] <= tp.y <= max([p.y for p in iter(self)])))
 			collided = collided and (min([p.z for p in iter(self)] <= tp.z <= max([p.z for p in iter(self)])))
 			return collided
-		
+
 		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
 			collided = False
 			collided = collided or self.checkCollision(object.point1)

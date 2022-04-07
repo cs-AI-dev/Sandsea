@@ -20,23 +20,23 @@ class PropertiesController:
 		self.airDensity = airDensity
 		self.precisionFactor = precisionFactor
 		self.gravitationEnabled = gravitationEnabled
-		
+
 	def setGravity(self, newValue):
 		self.gravity = newValue
 		self.properties["gravity"] = newValue
-		
+
 	def setAirDensity(self, newValue):
 		self.airDensity = newValue
 		self.properties["airDensity"] = newValue
-		
+
 	def setPrecisionFactor(self, newValue):
 		self.setPrecisionFactor = newValue
 		self.properties["setPrecisionFactor"] = newValue
-		
+
 	def setGravitationEnabled(self, newValue):
 		self.gravitationEnabled = newValue
 		self.properties["gravitationEnabled"] = newValue
-		
+
 	def toggleGravitation(self):
 		if self.gravitationEnabled:
 			self.gravitationEnabled = False
@@ -44,7 +44,7 @@ class PropertiesController:
 		else:
 			self.gravitationEnabled = True
 			self.properties["gravitationEnabled"] = True
-			
+
 	def setProperty(self, name, value):
 		if name == "gravity":
 			self.setGravity(value)
@@ -55,21 +55,43 @@ class PropertiesController:
 		if name == "gravitationEnabled":
 			self.setGravitationEnabled(value)
 
-class Simulation:
-	def __init__(self, *objects, **properties):
+class Asset:
+	def __init__(self, *objects):
 		self.objects = objects
-		gv = properties["gravity"]
-		ad = properties["airDensity"]
-		pf = properties["precisionFactor"]
-		ge = properties["gravitationEnabled"]
-		self.properties = PropertiesController(gv, ad, pf, ge)
-		
+		self.points = []
+		[self.points.append(x) for x in [obj.__iter__() for obj in self.objects]]
+		self.centerOfMass = objects.Point(sum([p.x for p in self.points]) / len(self.points), sum([p.y for p in self.points]) / len(self.points), sum([p.z for p in self.points]) / len(self.points))
+
 	def __iter__(self):
 		return self.objects
-	
+
+class Simulation:
+	def __init__(self, *assets, **properties):
+		self.objects = assets
+		if "gravity" in properties.keys():
+			gv = properties["gravity"]
+		else:
+			gv = objects.Vector(0, 0, 0)
+		if "gravity" in properties.keys():
+			ad = properties["airDensity"]
+		else:
+			ad = 0
+		if "gravity" in properties.keys():
+			pf = properties["precisionFactor"]
+		else:
+			pf = 1e-16
+		if "gravity" in properties.keys():
+			ge = properties["gravitationEnabled"]
+		else:
+			ge = True
+		self.properties = PropertiesController(gravity=gv, airDensity=ad, precisionFactor=pf, gravitationEnabled=ge)
+
+	def __iter__(self):
+		return self.objects
+
 	def tick(self):
 		pass
-	
+
 	def run(self, time, setting):
 		if setting == "s":
 			pass
