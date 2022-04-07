@@ -715,4 +715,10 @@ class Lowpoly:
 		return self
 	
 	def checkCollision(self, object):
-		return True
+		if type(object) == type(Point(0, 0, 0)):
+			collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
+			hits = 0
+			for tri in self.triangles:
+				if tri.checkCollision(collisionLine) and tri.point1.x < object.x and tri.point2.x < object.x and tri.point3.x < object.x:
+					hits += 1
+			return hits % 2 == 1
