@@ -419,6 +419,16 @@ class Sphere:
 		elif type(radius) == type(Point(0, 0, 0)):
 			self.radius = self.center.distance(radius)
 			self.tangentPoint = radius
+			
+	def translate(self, dx, dy, dz):
+		self.center.translate(dx, dy, dz)
+		self.tangentPoint.translate(dx, dy, dz)
+		return self
+		
+	def rotate(self, dx, dy, dz, centerPoint):
+		self.center.rotate(dx, dy, dz, centerPoint)
+		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
+		return self
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -491,7 +501,7 @@ class Cuboid:
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
-			tp = object.rotate(-self.rotation.x, -self.rotation.y, -self.rotation.z, Point(0, 0, 0))
+			tp = object.rotate(self.rotation.x, self.rotation.y, self.rotation.z, Point(0, 0, 0))
 			collided = True
 			collided = collided and (min([p.x for p in iter(self)] <= tp.x <= max([p.x for p in iter(self)])))
 			collided = collided and (min([p.y for p in iter(self)] <= tp.y <= max([p.y for p in iter(self)])))
@@ -503,4 +513,139 @@ class Cuboid:
 			collided = collided or self.checkCollision(object.point1)
 			collided = collided or self.checkCollision(object.point2)
 			collided = collided or self.checkCollision(object.point3)
+			return collided
+		
+class Block:
+	def __init__(self, corner1, arg2, material):
+		if type(arg2) == type(Point(0, 0, 0)):
+			# Close (1) / Far (2) - X
+			# Bottom (1) / Top (2) - Y
+			# Left (1) / Right (2) - Z
+			self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
+			self.far_bottom_left = Point(arg2.x, corner1.y, corner1.z)
+			self.close_top_left = Point(corner1.x, arg2.y, corner1.z)
+			self.far_top_left = Point(arg2.x, arg2.y, corner1.z)
+			self.close_bottom_right = Point(corner1.x, corner1.y, arg2.z)
+			self.far_bottom_right = Point(arg2.x, corner1.y, arg2.z)
+			self.close_top_right = Point(corner1.x, arg2.y, arg2.z)
+			self.far_top_right = Point(arg2.x, arg2.y, arg2.z)
+		elif type(arg2) == type(Vector(0, 0, 0)):
+			self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
+			self.far_bottom_left = Point(corner1.x + arg2.x, corner1.y, corner1.z)
+			self.close_top_left = Point(corner1.x, corner1.y + arg2.y, corner1.z)
+			self.far_top_left = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z)
+			self.close_bottom_right = Point(corner1.x, corner1.y, corner1.z + arg2.z)
+			self.far_bottom_right = Point(corner1.x + arg2.x, corner1.y, corner1.z + arg2.z)
+			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
+			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
+
+		self.points = [self.close_bottom_left, 
+			       self.far_bottom_left, 
+			       self.close_top_left, 
+			       self.far_top_left, 
+			       self.close_bottom_right,
+			       self.far_bottom_right,
+			       self.close_top_right,
+			       self.far_top_right
+			      ]
+		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
+		self.volume *= self.close_bottom_left.distance(self.close_top_left)
+		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
+		self.material = material
+		self.mass = self.volume * self.material.density
+		self.movement = Vector(0, 0, 0)
+		self.centerOfMass = Point(
+			sum([p.x for p in self.points]) / len(self.points),
+			sum([p.y for p in self.points]) / len(self.points),
+			sum([p.z for p in self.points]) / len(self.points)
+		)
+
+		self.rotation = Vector(0, 0, 0)
+
+	def __iter__(self):
+		return [
+			self.close_bottom_left,
+			self.far_bottom_left,
+				self.close_top_left,
+				self.far_top_left,
+				self.close_bottom_right,
+				self.far_bottom_right,
+				self.close_top_right,
+				self.far_top_right
+		]
+
+	def translate(self, dx, dy, dz):
+		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
+		return self
+
+	def rotate(self, dx, dy, dz, centerPoint=None):
+		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
+		self.rotation.addVector(Vector(dx, dy, dz))
+		return self
+	
+	def applyForce(self, force):
+		self.movement.addVector(force)
+
+	def checkCollision(self, object):
+		if type(object) == type(Point(0, 0, 0)):
+			tp = object.rotate(self.rotation.x, self.rotation.y, self.rotation.z, Point(0, 0, 0))
+			collided = True
+			collided = collided and (min([p.x for p in iter(self)] <= tp.x <= max([p.x for p in iter(self)])))
+			collided = collided and (min([p.y for p in iter(self)] <= tp.y <= max([p.y for p in iter(self)])))
+			collided = collided and (min([p.z for p in iter(self)] <= tp.z <= max([p.z for p in iter(self)])))
+			return collided
+
+		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
+			collided = False
+			collided = collided or self.checkCollision(object.point1)
+			collided = collided or self.checkCollision(object.point2)
+			collided = collided or self.checkCollision(object.point3)
+			return collided
+		
+class Ball:
+	def __init__(self, center, radius, material):
+		self.center = center
+
+		if type(radius) == type(1):
+			self.radius = radius
+			self.tangentPoint = self.center.translate(self.radius, 0, 0)
+		elif type(radius) == type(Point(0, 0, 0)):
+			self.radius = self.center.distance(radius)
+			self.tangentPoint = radius
+			
+		self.material = material
+		self.volume = (4/3) * math.pi * (self.radius ^ 3)
+		self.mass = self.volume * self.material.density
+		self.movement = Vector(0, 0, 0)
+		self.centerOfMass = self.center
+		
+	def applyForce(self, force):
+		self.movement.addVector(force)
+		
+	def translate(self, dx, dy, dz):
+		self.center.translate(dx, dy, dz)
+		self.tangentPoint.translate(dx, dy, dz)
+		return self
+		
+	def rotate(self, dx, dy, dz, centerPoint):
+		self.center.rotate(dx, dy, dz, centerPoint)
+		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
+		return self
+
+	def checkCollision(self, object):
+		if type(object) == type(Point(0, 0, 0)):
+			return self.center.distance(object) <= self.radius
+
+		elif type(object) == type(Triangle(Point(0, 0, 0), Point(0, 0, 0), Point(0, 0, 0))):
+			collided = False
+			collided = collided or self.center.distance(object.point1) <= self.radius
+			collided = collided or self.center.distance(object.point2) <= self.radius
+			collided = collided or self.center.distance(object.point3) <= self.radius
+			t12 = Triangle(self.center, object.point1, object.point2)
+			t13 = Triangle(self.center, object.point1, object.point3)
+			t23 = Triangle(self.center, object.point2, object.point3)
+			collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
+			collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
+			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
+
 			return collided
