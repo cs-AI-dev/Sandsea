@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import scipy
+from scipy import spatial
 
 setting = {"lowerCollisionThreshold": 1e-16}
 
@@ -420,12 +421,12 @@ class Sphere:
 		elif type(radius) == type(Point(0, 0, 0)):
 			self.radius = self.center.distance(radius)
 			self.tangentPoint = radius
-			
+
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
 		self.tangentPoint.translate(dx, dy, dz)
 		return self
-		
+
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
@@ -515,7 +516,7 @@ class Cuboid:
 			collided = collided or self.checkCollision(object.point2)
 			collided = collided or self.checkCollision(object.point3)
 			return collided
-		
+
 class Block:
 	def __init__(self, corner1, arg2, material):
 		if type(arg2) == type(Point(0, 0, 0)):
@@ -540,10 +541,10 @@ class Block:
 			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
 			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
 
-		self.points = [self.close_bottom_left, 
-			       self.far_bottom_left, 
-			       self.close_top_left, 
-			       self.far_top_left, 
+		self.points = [self.close_bottom_left,
+			       self.far_bottom_left,
+			       self.close_top_left,
+			       self.far_top_left,
 			       self.close_bottom_right,
 			       self.far_bottom_right,
 			       self.close_top_right,
@@ -583,7 +584,7 @@ class Block:
 		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
 		self.rotation.addVector(Vector(dx, dy, dz))
 		return self
-	
+
 	def applyForce(self, force):
 		self.movement.addVector(force)
 
@@ -602,7 +603,7 @@ class Block:
 			collided = collided or self.checkCollision(object.point2)
 			collided = collided or self.checkCollision(object.point3)
 			return collided
-		
+
 class Ball:
 	def __init__(self, center, radius, material):
 		self.center = center
@@ -613,21 +614,21 @@ class Ball:
 		elif type(radius) == type(Point(0, 0, 0)):
 			self.radius = self.center.distance(radius)
 			self.tangentPoint = radius
-			
+
 		self.material = material
 		self.volume = (4/3) * math.pi * (self.radius ^ 3)
 		self.mass = self.volume * self.material.density
 		self.movement = Vector(0, 0, 0)
 		self.centerOfMass = self.center
-		
+
 	def applyForce(self, force):
 		self.movement.addVector(force)
-		
+
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
 		self.tangentPoint.translate(dx, dy, dz)
 		return self
-		
+
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
@@ -657,21 +658,21 @@ class Cylinder:
 		self.radius = radius
 		self.height = height
 		self.material = material
-		self.volume = math.pi * (self.radius ^ 2) * self.height 
+		self.volume = math.pi * (self.radius ^ 2) * self.height
 		self.mass = self.volume * self.material.density
 		self.motion = Vector(0, 0, 0)
-		
+
 		self.rotationVector = Vector(0, 0, 0)
-		
+
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
 		return self
-	
+
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.rotationVector.addVector(dx, dy, dz)
 		return self
-		
+
 	def checkCollision(self, object):
 		rv = self.rotationVector
 		self.rotate(-self.rotationVector.x, -self.rotationVector.y, -self.rotationVector.z)
@@ -688,32 +689,39 @@ class Cylinder:
 			collided = collided or (t12.area * 2) / object.point1.distance(object.point2) <= self.radius
 			collided = collided or (t13.area * 2) / object.point1.distance(object.point3) <= self.radius
 			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
-			
+
 			zrange = False
 			zrange = zrange or self.center.z <= object.point1.z <= self.center.z + self.height
 			zrange = zrange or self.center.z <= object.point2.z <= self.center.z + self.height
 			zrange = zrange or self.center.z <= object.point3.z <= self.center.z + self.height
-			
+
 			return collided and zrange
 		self.rotate(rv.x, rv.y, rv.z)
-		
+
 class Lowpoly:
 	def __init__(self, material, *triangles):
 		self.triangles = triangles
+		self.points = []
+		[[self.points.append(p) for p in iter(tri)] for tri in self.triangles]
 		self.surfaceArea = sum([tri.area for tri in self.triangles])
-		self.volume = scipy.spatial.ConvexHull([[x for x in iter(tri)] for tri in self.triangles]).volume
+		try:
+			self.volume = spatial.ConvexHull(self.points).volume
+		except scipy.spatial._qhull.QhullError:
+			return False
+		except Exception as e:
+			raise e
 		self.material = material
 		self.mass = self.volume * self.material.density
 		self.movement = Vector(0, 0, 0)
-		
+
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
 		return self
-	
+
 	def rotate(self, dx, dy, dz, centerPoint):
 		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
 		return self
-	
+
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
 			collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
