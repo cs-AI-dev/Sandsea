@@ -7,6 +7,7 @@ import gui
 # # Area: m^2
 # # Length: m
 # # Energy: J
+# # Temperature: degrees K
 
 # gravity=objects.Vector(0, 0, 0), airDensity=0, precisionFactor=1e-16, gravitationEnabled=True, tickRate=1000
 
@@ -109,6 +110,16 @@ class Asset:
 		return out
 	
 	def checkCollision(self, object):
+		positiveObjects = []
+		negativeObjects = []
+		[negative.append(obj) if obj.isNegative else positiveObjects.append(obj) for obj in self.objects]
+		collided = []
+		[collided.append(positiveObject.checkCollision(object)) for positiveObject in positiveObjects]
+		[collided.append(not negativeObject.checkCollision(object)) for negativeObject in negativeObjects]
+		for collisionCheck in collided:
+			if collisionCheck:
+				return True
+		return False
 	
 	def setParentSimulation(self, parentSimulation):
 		try:
@@ -132,7 +143,7 @@ INITIALIZATION ARGUMENTS
                                              For example, Simulation(o1, o2, o3 ... oN)
 	**properties                       - Properties of the simulation. Include gravity,
 	                                     airDensity, precisionFactor, gravitationEnabled,
-		                             and tickRate.
+		                             tickRate, and smth.
 
 METHODS
 	tick()                             - Runs a single tick of the simulation.
@@ -165,6 +176,7 @@ METHODS
 			sum([asset.centerOfMass.z for asset in self.assets]) / len(self.assets)
 		)
 		self.properties = PropertiesController(**properties)
+		return self
 		
 	def __iter__(self):
 		self.n = 0
@@ -179,12 +191,13 @@ METHODS
 		return out
 
 	def tick(self):
-		pass
+		for asset in self.assets:
+			
 
 	def runUntilTimestamp(self, futureTimestamp):
 		while time.time() < futureTimestamp:
 			self.tick()
-		return self.objects
+		return self.__init__(*self.assets, **self.properties.properties)
 
 	def run(self, time, setting):
 		if setting in ["realSeconds", "rs"]:
