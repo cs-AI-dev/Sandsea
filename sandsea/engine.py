@@ -108,6 +108,8 @@ class Asset:
 			raise StopIteration
 		return out
 	
+	def checkCollision(self, object):
+	
 	def setParentSimulation(self, parentSimulation):
 		try:
 			self.parentSimulation = parentSimulation
