@@ -43,4 +43,7 @@ print("Loading logButton ...")
 logButton = Button(consoleView, text="Log Console Output to File", bg=bg, fg=fg, width=50, font=font(12))
 logButton.grid(row=3, column=2)
 
+def writeToConsole(text):
+	console.insert("end", "\n" + text)
+
 window.mainloop()
