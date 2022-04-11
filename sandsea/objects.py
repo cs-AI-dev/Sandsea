@@ -518,7 +518,7 @@ class Cuboid:
 			return collided
 
 class Block:
-	def __init__(self, corner1, arg2, material):
+	def __init__(self, corner1, arg2, material, isNegative):
 		if type(arg2) == type(Point(0, 0, 0)):
 			# Close (1) / Far (2) - X
 			# Bottom (1) / Top (2) - Y
@@ -563,6 +563,7 @@ class Block:
 		)
 
 		self.rotation = Vector(0, 0, 0)
+		self.isNegative = isNegative
 
 	def __iter__(self):
 		return [
@@ -605,7 +606,7 @@ class Block:
 			return collided
 
 class Ball:
-	def __init__(self, center, radius, material):
+	def __init__(self, center, radius, material, isNegative):
 		self.center = center
 
 		if type(radius) == type(1):
@@ -614,6 +615,7 @@ class Ball:
 		elif type(radius) == type(Point(0, 0, 0)):
 			self.radius = self.center.distance(radius)
 			self.tangentPoint = radius
+			self.isNegative = isNegative
 
 		self.material = material
 		self.volume = (4/3) * math.pi * (self.radius ^ 3)
@@ -653,14 +655,15 @@ class Ball:
 			return collided
 
 class Cylinder:
-	def __init__(self, centerPoint, radius, height, material):
+	def __init__(self, centerPoint, radius, height, material, isNegative):
 		self.centerPoint = centerPoint
 		self.radius = radius
 		self.height = height
 		self.material = material
 		self.volume = math.pi * (self.radius ^ 2) * self.height
 		self.mass = self.volume * self.material.density
-		self.motion = Vector(0, 0, 0)
+		self.movement = Vector(0, 0, 0)
+		self.isNegative = isNegative
 
 		self.rotationVector = Vector(0, 0, 0)
 
@@ -699,7 +702,7 @@ class Cylinder:
 		self.rotate(rv.x, rv.y, rv.z)
 
 class Lowpoly:
-	def __init__(self, material, *triangles):
+	def __init__(self, material, isNegative, *triangles):
 		self.triangles = triangles
 		self.points = []
 		[[self.points.append(p) for p in iter(tri)] for tri in self.triangles]
@@ -713,6 +716,7 @@ class Lowpoly:
 		self.material = material
 		self.mass = self.volume * self.material.density
 		self.movement = Vector(0, 0, 0)
+		self.isNegative = isNegative
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
