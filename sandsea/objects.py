@@ -2,6 +2,12 @@ import math
 import numpy as np
 import scipy
 from scipy import spatial
+import pandas as pd
+import numpy as np
+import descartes
+from descartes import PolygonPatch
+import matplotlib.pyplot as plt
+import alphashape
 
 setting = {"lowerCollisionThreshold": 1e-16}
 
@@ -21,9 +27,9 @@ class Vector:
 		self.y = y
 		self.z = z
 		self.net = x + y + z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
-	def __init__(self):
+	def __iter__(self):
 		return [self.x, self.y, self.z]
 
 	def addVector(self, vector):
@@ -31,91 +37,91 @@ class Vector:
 		self.y = self.y + vector.y
 		self.z = self.z + vector.z
 		self.net = self.net + vector.net
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def addx(self, x):
 		self.x += x
 		self.net = x + y + z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def addy(self, y):
 		self.y += y
 		self.net = x + y + z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def addz(self, z):
 		self.z += z
 		self.net = x + y + z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def subtractVector(self, vector):
 		self.x = self.x - vector.x
 		self.y = self.y - vector.y
 		self.z = self.z - vector.z
 		self.net = self.net - vector.net
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def subx(self, x):
 		self.x -= x
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def suby(self, y):
 		self.y -= y
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def subz(self, z):
 		self.z -= z
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def multiplyVector(self, vector):
 		self.x = self.x * vector.x
 		self.y = self.y * vector.y
 		self.z = self.z * vector.z
 		self.net = self.net - vector.net
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def mulx(self, x):
 		self.x *= x
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def muly(self, y):
 		self.y *= y
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def mulz(self, z):
 		self.z *= z
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def divideVector(self, vector):
 		self.x = self.x / vector.x
 		self.y = self.y / vector.y
 		self.z = self.z / vector.z
 		self.net = self.net - vector.net
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def divx(self, x):
 		self.x /= x
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def divy(self, y):
 		self.y /= y
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 	def divz(self, z):
 		self.z /= z
 		self.net = self.x + self.y + self.z
-		self.length = sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
+		self.length = math.sqrt((self.x ** 2) + (self.y ** 2) + (self.z ** 2))
 
 class Point:
-	def __init__(a1, y, z):
+	def __init__(self, a1, y, z):
 		if type(y) == type(1) and type(z) == type(1):
 			if type(a1) == type(Vector(0, 0, 0)):
 				self.x = a1.x
@@ -206,7 +212,7 @@ class Angle:
 		endp1.translate(center.x, center.y, center.z)
 		endp2.translate(center.x, center.y, center.z)
 
-		self.angle = math.acos((ep1.x * ep2.x + ep1.y * ep2.y + ep1.z * ep2.z) / (sqrt((ep1.x ** 2) + (ep1.y ** 2) + (ep1.z ** 2)) * sqrt((ep2.x ** 2) + (ep2.y ** 2) + (ep2.z ** 2))))
+		self.angle = math.acos((ep1.x * ep2.x + ep1.y * ep2.y + ep1.z * ep2.z) / (sqrt((ep1.x ** 2) + (ep1.y ** 2) + (ep1.z ** 2)) * math.sqrt((ep2.x ** 2) + (ep2.y ** 2) + (ep2.z ** 2))))
 
 	def translate(self, dx, dy, dz):
 		self.__init__(self.center.translate(dx, dy, dz), self.endpoint1.translate(dx, dy, dz), self.endpoint2.translate(dx, dy, dz))
@@ -555,7 +561,8 @@ class Block:
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
 		self.material = material
 		self.mass = self.volume * self.material.density
-		self.movement = Vector(0, 0, 0)
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
 		self.centerOfMass = Point(
 			sum([p.x for p in self.points]) / len(self.points),
 			sum([p.y for p in self.points]) / len(self.points),
@@ -605,6 +612,16 @@ class Block:
 			collided = collided or self.checkCollision(object.point3)
 			return collided
 
+	def applyLinearForce(self, force):
+		self.linearMovement.addVector(force)
+
+	def applyAngularForce(self, force):
+		self.angularMovement.addVector(force)
+
+	def applyForces(self, linear, angular):
+		self.applyLinearForce(linear)
+		self.applyAngularForce(angular)
+
 class Ball:
 	def __init__(self, center, radius, material, isNegative):
 		self.center = center
@@ -620,7 +637,8 @@ class Ball:
 		self.material = material
 		self.volume = (4/3) * math.pi * (self.radius ^ 3)
 		self.mass = self.volume * self.material.density
-		self.movement = Vector(0, 0, 0)
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
 		self.centerOfMass = self.center
 
 	def applyForce(self, force):
@@ -654,6 +672,16 @@ class Ball:
 
 			return collided
 
+	def applyForce(self, force):
+		self.linearMovement.addVector(force)
+
+	def applyAngularForce(self, force):
+		self.angularMovement.addVector(force)
+
+	def applyForces(self, linear, angular):
+		self.applyLinearForce(linear)
+		self.applyAngularForce(angular)
+
 class Cylinder:
 	def __init__(self, centerPoint, radius, height, material, isNegative):
 		self.centerPoint = centerPoint
@@ -662,8 +690,13 @@ class Cylinder:
 		self.material = material
 		self.volume = math.pi * (self.radius ^ 2) * self.height
 		self.mass = self.volume * self.material.density
+<<<<<<< Updated upstream
 		self.movement = Vector(0, 0, 0)
 		self.isNegative = isNegative
+=======
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
+>>>>>>> Stashed changes
 
 		self.rotationVector = Vector(0, 0, 0)
 
@@ -701,11 +734,29 @@ class Cylinder:
 			return collided and zrange
 		self.rotate(rv.x, rv.y, rv.z)
 
+<<<<<<< Updated upstream
 class Lowpoly:
 	def __init__(self, material, isNegative, *triangles):
+=======
+	def applyLinearForce(self, force):
+		self.linearMovement.addVector(force)
+
+	def applyAngularForce(self, force):
+		self.angularMovement.addVector(force)
+
+	def applyForces(self, linear, angular):
+		self.applyLinearForce(linear)
+		self.applyAngularForce(angular)
+
+class ConvexLowpoly:
+	def __init__(self, material, *triangles):
+>>>>>>> Stashed changes
 		self.triangles = triangles
 		self.points = []
-		[[self.points.append(p) for p in iter(tri)] for tri in self.triangles]
+		for tri in self.triangles:
+			self.points.append(tri.point1)
+			self.points.append(tri.point2)
+			self.points.append(tri.point3)
 		self.surfaceArea = sum([tri.area for tri in self.triangles])
 		try:
 			self.volume = spatial.ConvexHull(self.points).volume
@@ -715,8 +766,12 @@ class Lowpoly:
 			raise e
 		self.material = material
 		self.mass = self.volume * self.material.density
+<<<<<<< Updated upstream
 		self.movement = Vector(0, 0, 0)
 		self.isNegative = isNegative
+=======
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
@@ -734,3 +789,61 @@ class Lowpoly:
 				if tri.checkCollision(collisionLine) and tri.point1.x < object.x and tri.point2.x < object.x and tri.point3.x < object.x:
 					hits += 1
 			return hits % 2 == 1
+
+	def applyLinearForce(self, force):
+		self.linearMovement.addVector(force)
+
+	def applyAngularForce(self, force):
+		self.angularMovement.addVector(force)
+
+	def applyForces(self, linear, angular):
+		self.applyLinearForce(linear)
+		self.applyAngularForce(angular)
+
+class ConcaveLowpoly:
+	def __init__(self, material, alpha=0.4 , *triangles):
+		self.triangles = triangles
+		self.points = []
+		for tri in self.triangles:
+			self.points.append(tri.point1)
+			self.points.append(tri.point2)
+			self.points.append(tri.point3)
+		self.surfaceArea = sum([tri.area for tri in self.triangles])
+		self.alphashape = alphashape.alphashape([(p.x, p.y, p.z) for p in self.points], alpha)
+		self.volume = self.alphashape.volume
+		self.material = material
+		self.mass = self.volume * self.material.density
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
+>>>>>>> Stashed changes
+
+	def translate(self, dx, dy, dz):
+		[tri.translate(dx, dy, dz) for tri in self.triangles]
+		[point.translate(dx, dy, dz) for point in self.points]
+		return self
+
+	def rotate(self, dx, dy, dz, centerPoint):
+		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
+		[point.rotate(dx, dy, dz, centerPoint) for point in self.points]
+		return self
+
+	def checkCollision(self, object):
+		if type(object) == type(Point(0, 0, 0)):
+			collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
+			hits = 0
+			for tri in self.triangles:
+				if tri.checkCollision(collisionLine) and tri.point1.x < object.x and tri.point2.x < object.x and tri.point3.x < object.x:
+					hits += 1
+			return hits % 2 == 1
+
+	def applyLinearForce(self, force):
+		self.linearMovement.addVector(force)
+
+	def applyAngularForce(self, force):
+		self.angularMovement.addVector(force)
+
+	def applyForces(self, linear, angular):
+		self.applyLinearForce(linear)
+		self.applyAngularForce(angular)
+
+Lowpoly = ConvexLowpoly

@@ -18,13 +18,15 @@ class PropertiesController:
 			"airDensity": properties["airDensity"],
 			"precisionFactor": properties["precisionFactor"],
 			"gravitationEnabled": properties["gravitationEnabled"],
-			"tickRate": properties["tickRate"]
+			"tickRate": properties["tickRate"],
+			"gravitationalConstant": properties["gravitationalConstant"]
 		}
 		self.gravity = properties["gravity"]
 		self.airDensity = properties["airDensity"]
 		self.precisionFactor = properties["precisionFactor"]
 		self.gravitationEnabled = properties["gravitationEnabled"]
 		self.tickRate = properties["tickRate"]
+		self.gravitationalConstant
 
 	def setGravity(self, newValue):
 		self.gravity = newValue
@@ -65,7 +67,7 @@ class PropertiesController:
 			self.setGravitationEnabled(value)
 		if name == "tickRate":
 			self.setTickRate(value)
-			
+
 class Material:
 	def __init__(self, density=1, electricalResistance=0, magnetic=True, reflectance=1, meltingPoint=1000, boilingPoint=2000):
 		self.density = density
@@ -74,7 +76,7 @@ class Material:
 		self.reflectance = reflectance
 		self.meltingPoint = meltingPoint
 		self.boilingPoint = boilingPoint
-		
+
 	def stateOfMatter(self, temperatureK):
 		if temperatureK <= meltingPoint:
 			return 0
@@ -82,7 +84,7 @@ class Material:
 			return 1
 		else:
 			return 2
-		
+
 class Asset:
 	def __init__(self, materialObject, *objects):
 		self.objects = objects
@@ -100,7 +102,7 @@ class Asset:
 	def __iter__(self):
 		self.n = 0
 		return self
-	
+
 	def __next__(self):
 		if self.n < len(self.objects):
 			out = self.objects[self.n]
@@ -108,6 +110,7 @@ class Asset:
 		else:
 			raise StopIteration
 		return out
+<<<<<<< Updated upstream
 	
 	def checkCollision(self, object):
 		positiveObjects = []
@@ -121,6 +124,9 @@ class Asset:
 				return True
 		return False
 	
+=======
+
+>>>>>>> Stashed changes
 	def setParentSimulation(self, parentSimulation):
 		try:
 			self.parentSimulation = parentSimulation
@@ -176,8 +182,12 @@ METHODS
 			sum([asset.centerOfMass.z for asset in self.assets]) / len(self.assets)
 		)
 		self.properties = PropertiesController(**properties)
+<<<<<<< Updated upstream
 		return self
 		
+=======
+
+>>>>>>> Stashed changes
 	def __iter__(self):
 		self.n = 0
 		return self
@@ -191,8 +201,15 @@ METHODS
 		return out
 
 	def tick(self):
+<<<<<<< Updated upstream
 		for asset in self.assets:
 			
+=======
+		if self.properties.gravitationEnabled:
+			for obj1 in self.assets:
+				for obj2 in self.assets:
+					forceValue = (gravitationalConstant * ((obj1.mass * obj2.mass) / obj1.centerOfMass.distance(obj2.centerOfMasss))) / self.properties.ticksPerSecond
+>>>>>>> Stashed changes
 
 	def runUntilTimestamp(self, futureTimestamp):
 		while time.time() < futureTimestamp:
