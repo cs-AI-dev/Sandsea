@@ -8,6 +8,8 @@ import descartes
 from descartes import PolygonPatch
 import matplotlib.pyplot as plt
 import alphashape
+import inspect
+from inspect import signature
 
 setting = {"lowerCollisionThreshold": 1e-16}
 
@@ -151,6 +153,9 @@ class Point:
 		self.vector = Vector(self.x, self.y, self.z)
 
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		if centerPoint != None:
@@ -188,6 +193,9 @@ class Point:
 		self.z = ((Azx * px) + (Azy * py) + (Azz * pz)) + centerPoint[2]
 
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def distance(self, object):
 		if type(object) == type(self):
@@ -217,10 +225,16 @@ class Angle:
 	def translate(self, dx, dy, dz):
 		self.__init__(self.center.translate(dx, dy, dz), self.endpoint1.translate(dx, dy, dz), self.endpoint2.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.center.rotate(dx, dy, dz, centerPoint), self.endpoint1.rotate(dx, dy, dz, centerPoint), self.endpoint2.rotate(dx, dy, dz, centerPoint))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 class Line:
 	def __init__(self, point1, arg2):
@@ -249,10 +263,16 @@ class Line:
 	def translate(self, dx, dy, dz):
 		self.__init__(origin.translate(dx, dy, dz), self.pointOnRay.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.origin.rotate(dx, dy, dz, centerPoint), self.pointOnRay.rotate(dx, dy, dz, centerPoint))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -327,10 +347,16 @@ class Ray:
 	def translate(self, dx, dy, dz):
 		self.__init__(origin.translate(dx, dy, dz), self.pointOnRay.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.origin.rotate(dx, dy, dz, centerPoint), self.pointOnRay.rotate(dx, dy, dz, centerPoint))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		pass
@@ -359,10 +385,16 @@ class Triangle:
 	def translate(self, dx, dy, dz):
 		self.__init__(self.point1.translate(dx, dy, dz), self.point2.translate(dx, dy, dz), self.point3.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.point1.rotate(dx, dy, dz, centerPoint), self.point2.rotate(dx, dy, dz, centerPoint), self.point3.rotate(dx, dy, dz, centerPoint))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(point):
@@ -432,11 +464,17 @@ class Sphere:
 		self.center.translate(dx, dy, dz)
 		self.tangentPoint.translate(dx, dy, dz)
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -501,11 +539,17 @@ class Cuboid:
 	def translate(self, dx, dy, dz):
 		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
 		self.rotation.addVector(Vector(dx, dy, dz))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -587,11 +631,17 @@ class Block:
 	def translate(self, dx, dy, dz):
 		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
 		self.rotation.addVector(Vector(dx, dy, dz))
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def applyForce(self, force):
 		self.movement.addVector(force)
@@ -612,15 +662,28 @@ class Block:
 			collided = collided or self.checkCollision(object.point3)
 			return collided
 
-	def applyLinearForce(self, force):
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+	
+	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
-
-	def applyAngularForce(self, force):
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+	
+	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
-
-	def applyForces(self, linear, angular):
-		self.applyLinearForce(linear)
-		self.applyAngularForce(angular)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
 
 class Ball:
 	def __init__(self, center, radius, material, isNegative):
@@ -648,11 +711,17 @@ class Ball:
 		self.center.translate(dx, dy, dz)
 		self.tangentPoint.translate(dx, dy, dz)
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -672,15 +741,28 @@ class Ball:
 
 			return collided
 
-	def applyForce(self, force):
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+	
+	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
-
-	def applyAngularForce(self, force):
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+	
+	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
-
-	def applyForces(self, linear, angular):
-		self.applyLinearForce(linear)
-		self.applyAngularForce(angular)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
 
 class Cylinder:
 	def __init__(self, centerPoint, radius, height, material, isNegative):
@@ -690,24 +772,27 @@ class Cylinder:
 		self.material = material
 		self.volume = math.pi * (self.radius ^ 2) * self.height
 		self.mass = self.volume * self.material.density
-<<<<<<< Updated upstream
 		self.movement = Vector(0, 0, 0)
 		self.isNegative = isNegative
-=======
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
->>>>>>> Stashed changes
 
 		self.rotationVector = Vector(0, 0, 0)
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.rotationVector.addVector(dx, dy, dz)
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		rv = self.rotationVector
@@ -733,24 +818,32 @@ class Cylinder:
 
 			return collided and zrange
 		self.rotate(rv.x, rv.y, rv.z)
-
-<<<<<<< Updated upstream
-class Lowpoly:
-	def __init__(self, material, isNegative, *triangles):
-=======
-	def applyLinearForce(self, force):
+		
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+	
+	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
-
-	def applyAngularForce(self, force):
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+	
+	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
-
-	def applyForces(self, linear, angular):
-		self.applyLinearForce(linear)
-		self.applyAngularForce(angular)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
 
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
->>>>>>> Stashed changes
 		self.triangles = triangles
 		self.points = []
 		for tri in self.triangles:
@@ -766,20 +859,24 @@ class ConvexLowpoly:
 			raise e
 		self.material = material
 		self.mass = self.volume * self.material.density
-<<<<<<< Updated upstream
-		self.movement = Vector(0, 0, 0)
 		self.isNegative = isNegative
-=======
+
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -792,16 +889,19 @@ class ConvexLowpoly:
 
 	def applyLinearForce(self, force):
 		self.linearMovement.addVector(force)
-
+		return self
+	
 	def applyAngularForce(self, force):
 		self.angularMovement.addVector(force)
-
-	def applyForces(self, linear, angular):
-		self.applyLinearForce(linear)
-		self.applyAngularForce(angular)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
 
 class ConcaveLowpoly:
-	def __init__(self, material, alpha=0.4 , *triangles):
+	def __init__(self, material, alpha=0.4, *triangles):
 		self.triangles = triangles
 		self.points = []
 		for tri in self.triangles:
@@ -815,35 +915,159 @@ class ConcaveLowpoly:
 		self.mass = self.volume * self.material.density
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
->>>>>>> Stashed changes
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
 		[point.translate(dx, dy, dz) for point in self.points]
 		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
 
-	def rotate(self, dx, dy, dz, centerPoint):
+	def rotate(self, dx, dy, dz, centerPoint=Point(0, 0, 0)):
 		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
 		[point.rotate(dx, dy, dz, centerPoint) for point in self.points]
 		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
 			collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
 			hits = 0
 			for tri in self.triangles:
-				if tri.checkCollision(collisionLine) and tri.point1.x < object.x and tri.point2.x < object.x and tri.point3.x < object.x:
+				if tri.checkCollision(collisionLine) \
+				and tri.point1.x < object.x \
+				and tri.point2.x < object.x \
+				and tri.point3.x < object.x:
 					hits += 1
 			return hits % 2 == 1
 
 	def applyLinearForce(self, force):
 		self.linearMovement.addVector(force)
-
+		return self
+	
 	def applyAngularForce(self, force):
 		self.angularMovement.addVector(force)
-
-	def applyForces(self, linear, angular):
-		self.applyLinearForce(linear)
-		self.applyAngularForce(angular)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
 
 Lowpoly = ConvexLowpoly
+
+class Custom:
+	def __init__(self, material, volume, collisionFunction, position):
+		if type(position) = type(Point(0, 0, 0)):
+			self.coordinates = position
+		elif type(position) = type(Vector(0, 0, 0)):
+			self.coordinates = Point(position.x, position.y, position.z)
+		elif type(position) in [type([]), type((False, False))]:
+			if len(position) == 3 and type(position[0]) in [type(0), type(0.5)] \
+			and type(position[0]) in [type(0), type(0.5)] \
+			and type(position[0]) in [type(0), type(0.5)]:
+				self.coordinates = Point(position[0], position[1], position[2])
+			else:
+				raise IndexError("Tuples or Lists for positional arguments must contain exactly three numbers")
+		else:
+			raise TypeError("Position must be a Point, Vector, List, or Triple.")
+		self.position = self.coordinates
+		self.material = material
+		self.volume = volume
+		self.mass = self.volume * self.material.density
+		
+		self.collisionFunction = collisionFunction
+		
+		self.linearMovement = Vector(0, 0, 0)
+		self.angularMovement = Vector(0, 0, 0)
+		
+		self.rotation = Vector(0, 0, 0)
+		
+	def translate(self, dx, dy, dz):
+		self.coordinates.translate(dx, dy, dz)
+		self.position = self.coordinates
+		return self
+	
+	def translateVector(self, vector):
+		self.translate(vector.x, vector.y, vector.z)
+	
+	def rotate(self, dx, dy, dz, centerPoint=Point(0, 0, 0)):
+		self.coordinates.rotate(dx, dy, dz, centerPoint)
+		self.position = self.coordinates
+		self.rotation.addVector(Vector(dx, dy, dz))
+		return self
+	
+	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
+		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+	
+	def checkCollision(self, object):
+		crv = self.rotation
+		self.rotate(-self.rotation.x, -self.rotation.y, -self.rotation.z)
+		rotation_reversed = self
+		self.rotate(crv.x, crv.y, crv.z)
+		del crv
+		pos = self.position
+		self.translate(-self.position.x, -self.position.y, -self.position.z)
+		at_0 = self
+		self.translate(pos.x, pos.y, pos.z)
+		del pos
+		return self.collisionFunction(**{
+			"object": object,
+			"self_current": self,
+			"self_rotation_reversed": rotation_reversed,
+			"self_at_0": at_0
+		})
+	
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+	
+	def applyLinearForceVector(self, force):
+		self.linearMovement.addVector(force)
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+	
+	def applyAngularForceVector(self, force):
+		self.angularMovement.addVector(force)
+		return self
+	
+	def applyForce(self, linearForce, angularForce):
+		self.linearMovement.addVector(linearForce)
+		self.angularMovement.addVector(angularForce)
+		return self
+	
+class Link:
+	def __init__(self, translation=True, rotation=True, linearForce=True, angularForce=True, *objects):
+		self.objects = objects
+		self.translationEnabled = translation
+		self.rotationEnabled = rotation
+		self.linearForceEnabled = linearForce
+		self.angularForceEnabled = angularForce
+		
+		
+	def propagateEffect(self, affectedObject, effectType, dx, dy, dz, centerPoint):
+		try:
+			for obj in self.objects:
+				if obj == affectedObject:
+					pass
+				else:
+					if effectType == 0:
+						obj.translate(dx, dy, dz)
+					if effectType == 1:
+						obj.rotate(dx, dy, dz, centerPoint)
+					if effectType == 2:
+						obj.applyLinearForce(dx, dy, dz)
+					if effectType == 3:
+						obj.applyAngularForce(dx, dy, dz)
+		except Exception as e:
+			raise e
+		finally:
+			return True
