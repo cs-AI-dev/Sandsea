@@ -615,6 +615,8 @@ class Block:
 
 		self.rotation = Vector(0, 0, 0)
 		self.isNegative = isNegative
+		
+		self.links = []
 
 	def __iter__(self):
 		return [
@@ -627,21 +629,43 @@ class Block:
 				self.close_top_right,
 				self.far_top_right
 		]
+	
+	def recalculate(self, corner1, corner2):
+		self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
+		self.far_bottom_left = Point(arg2.x, corner1.y, corner1.z)
+		self.close_top_left = Point(corner1.x, arg2.y, corner1.z)
+		self.far_top_left = Point(arg2.x, arg2.y, corner1.z)
+		self.close_bottom_right = Point(corner1.x, corner1.y, arg2.z)
+		self.far_bottom_right = Point(arg2.x, corner1.y, arg2.z)
+		self.close_top_right = Point(corner1.x, arg2.y, arg2.z)
+		self.far_top_right = Point(arg2.x, arg2.y, arg2.z)
+		
+		self.points = [self.close_bottom_left,
+			       self.far_bottom_left,
+			       self.close_top_left,
+			       self.far_top_left,
+			       self.close_bottom_right,
+			       self.far_bottom_right,
+			       self.close_top_right,
+			       self.far_top_right
+			      ]
 
 	def translate(self, dx, dy, dz):
-		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
+		self.recalculate(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=None):
 		self.__init__(self.close_bottom_left.rotate(dx, dy, dz, centerPoint), self.far_top_right.rotate(dx, dy, dz, centerPoint))
 		self.rotation.addVector(Vector(dx, dy, dz))
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def applyForce(self, force):
 		self.movement.addVector(force)
@@ -666,23 +690,31 @@ class Block:
 		self.linearMovement.addx(fx)
 		self.linearMovement.addy(fy)
 		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyAngularForce(self, fx, fy, fz):
 		self.angularMovement.addx(fx)
 		self.angularMovement.addy(fy)
 		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
 class Ball:
@@ -703,25 +735,26 @@ class Ball:
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
 		self.centerOfMass = self.center
-
-	def applyForce(self, force):
-		self.movement.addVector(force)
+		
+		self.links = []
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
 		self.tangentPoint.translate(dx, dy, dz)
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.tangentPoint.rotate(dx, dy, dz, centerPoint)
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -745,23 +778,31 @@ class Ball:
 		self.linearMovement.addx(fx)
 		self.linearMovement.addy(fy)
 		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyAngularForce(self, fx, fy, fz):
 		self.angularMovement.addx(fx)
 		self.angularMovement.addy(fy)
 		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
 class Cylinder:
@@ -778,21 +819,25 @@ class Cylinder:
 		self.angularMovement = Vector(0, 0, 0)
 
 		self.rotationVector = Vector(0, 0, 0)
+		
+		self.links = []
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		self.center.rotate(dx, dy, dz, centerPoint)
 		self.rotationVector.addVector(dx, dy, dz)
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		rv = self.rotationVector
@@ -823,25 +868,60 @@ class Cylinder:
 		self.linearMovement.addx(fx)
 		self.linearMovement.addy(fy)
 		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyAngularForce(self, fx, fy, fz):
 		self.angularMovement.addx(fx)
 		self.angularMovement.addy(fy)
 		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
+class TriangularPyramid:
+	def __init__(self, pb1, pb2, pb3, pv, material):
+		self.point_base1 = pb1 # point 1
+		self.point1 = self.point_base1
+		self.point_base2 = pb2 # point 2
+		self.point2 = self.point_base2
+		self.point_base3 = pb3 # point 3
+		self.point3 = self.point_base3
+		self.point_vertex = pv # point 4
+		self.point4 = self.point_vertex
+		self.base = Triangle(self.point_base1, self.point_base2, self.point_base3)
+		self.face_123 = self.base
+		self.face_124 = Triangle(self.point1, self.point2, self.point3)
+		self.face_134 = Triangle(self.point1, self.point3, self.point4)
+		self.face_234 = Triangle(self.point2, self.point3, self.point4)
+		self.surface_area = self.face_123.area + self.face_124.area + self.face_134.area + self.face_234.area
+		self.material = material
+		self.volume = self.face_123.area
+		
+	def __iter__(self):
+		pass
+	
+	def __next__(self):
+		pass
+	
+	
+	
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
 		self.triangles = triangles
@@ -863,20 +943,24 @@ class ConvexLowpoly:
 
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
+		
+		self.links = []
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint):
 		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -887,17 +971,35 @@ class ConvexLowpoly:
 					hits += 1
 			return hits % 2 == 1
 
-	def applyLinearForce(self, force):
-		self.linearMovement.addVector(force)
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
 		return self
 	
-	def applyAngularForce(self, force):
+	def applyLinearForceVector(self, force):
+		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
+	
+	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
 class ConcaveLowpoly:
@@ -915,22 +1017,26 @@ class ConcaveLowpoly:
 		self.mass = self.volume * self.material.density
 		self.linearMovement = Vector(0, 0, 0)
 		self.angularMovement = Vector(0, 0, 0)
+		
+		self.links = []
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
 		[point.translate(dx, dy, dz) for point in self.points]
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 
 	def rotate(self, dx, dy, dz, centerPoint=Point(0, 0, 0)):
 		[tri.rotate(dx, dy, dz, centerPoint) for tri in self.triangles]
 		[point.rotate(dx, dy, dz, centerPoint) for point in self.points]
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 
 	def checkCollision(self, object):
 		if type(object) == type(Point(0, 0, 0)):
@@ -944,17 +1050,35 @@ class ConcaveLowpoly:
 					hits += 1
 			return hits % 2 == 1
 
-	def applyLinearForce(self, force):
-		self.linearMovement.addVector(force)
+	def applyLinearForce(self, fx, fy, fz):
+		self.linearMovement.addx(fx)
+		self.linearMovement.addy(fy)
+		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
 		return self
 	
-	def applyAngularForce(self, force):
+	def applyLinearForceVector(self, force):
+		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
+		return self
+	
+	def applyAngularForce(self, fx, fy, fz):
+		self.angularMovement.addx(fx)
+		self.angularMovement.addy(fy)
+		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
+	
+	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
 Lowpoly = ConvexLowpoly
@@ -986,22 +1110,26 @@ class Custom:
 		
 		self.rotation = Vector(0, 0, 0)
 		
+		self.links = []
+		
 	def translate(self, dx, dy, dz):
 		self.coordinates.translate(dx, dy, dz)
 		self.position = self.coordinates
+		[link.propagateEffect(self, 0, dx, dy, dz) for link in self.links]
 		return self
 	
 	def translateVector(self, vector):
-		self.translate(vector.x, vector.y, vector.z)
+		return self.translate(vector.x, vector.y, vector.z)
 	
 	def rotate(self, dx, dy, dz, centerPoint=Point(0, 0, 0)):
 		self.coordinates.rotate(dx, dy, dz, centerPoint)
 		self.position = self.coordinates
 		self.rotation.addVector(Vector(dx, dy, dz))
+		[link.propagateEffect(self, 1, dx, dy, dz, centerPoint) for link in self.links]
 		return self
 	
 	def rotateVector(self, vector, centerPoint=Point(0, 0, 0)):
-		self.rotate(vector.x, vector.y, vector.z, centerPoint)
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint)
 	
 	def checkCollision(self, object):
 		crv = self.rotation
@@ -1025,33 +1153,42 @@ class Custom:
 		self.linearMovement.addx(fx)
 		self.linearMovement.addy(fy)
 		self.linearMovement.addz(fz)
+		[link.propagateEffect(self, 2, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyLinearForceVector(self, force):
 		self.linearMovement.addVector(force)
+		[link.propagateEffect(self, 2, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyAngularForce(self, fx, fy, fz):
 		self.angularMovement.addx(fx)
 		self.angularMovement.addy(fy)
 		self.angularMovement.addz(fz)
+		[link.propagateEffect(self, 3, fx, fy, fz) for link in self.links]
+		return self
 	
 	def applyAngularForceVector(self, force):
 		self.angularMovement.addVector(force)
+		[link.propagateEffect(self, 3, force.x, force.y, force.z) for link in self.links]
 		return self
 	
 	def applyForce(self, linearForce, angularForce):
 		self.linearMovement.addVector(linearForce)
 		self.angularMovement.addVector(angularForce)
+		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
+		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 	
 class Link:
 	def __init__(self, translation=True, rotation=True, linearForce=True, angularForce=True, *objects):
 		self.objects = objects
+		for obj in objects:
+			obj.links.append(self)
 		self.translationEnabled = translation
 		self.rotationEnabled = rotation
 		self.linearForceEnabled = linearForce
 		self.angularForceEnabled = angularForce
-		
 		
 	def propagateEffect(self, affectedObject, effectType, dx, dy, dz, centerPoint):
 		try:
