@@ -111,7 +111,7 @@ class Asset:
 			raise StopIteration
 		return out
 <<<<<<< Updated upstream
-	
+
 	def checkCollision(self, object):
 		positiveObjects = []
 		negativeObjects = []
@@ -123,7 +123,7 @@ class Asset:
 			if collisionCheck:
 				return True
 		return False
-	
+
 =======
 
 >>>>>>> Stashed changes
@@ -182,12 +182,6 @@ METHODS
 			sum([asset.centerOfMass.z for asset in self.assets]) / len(self.assets)
 		)
 		self.properties = PropertiesController(**properties)
-<<<<<<< Updated upstream
-		return self
-		
-=======
-
->>>>>>> Stashed changes
 	def __iter__(self):
 		self.n = 0
 		return self
@@ -201,15 +195,13 @@ METHODS
 		return out
 
 	def tick(self):
-<<<<<<< Updated upstream
 		for asset in self.assets:
-			
-=======
+			pass
+
 		if self.properties.gravitationEnabled:
 			for obj1 in self.assets:
 				for obj2 in self.assets:
 					forceValue = (gravitationalConstant * ((obj1.mass * obj2.mass) / obj1.centerOfMass.distance(obj2.centerOfMasss))) / self.properties.ticksPerSecond
->>>>>>> Stashed changes
 
 	def runUntilTimestamp(self, futureTimestamp):
 		while time.time() < futureTimestamp:
