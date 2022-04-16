@@ -1285,6 +1285,41 @@ class ContactTrigger:
 		collided = False
 		for x in objects:
 			collided = collided or object.checkCollision(object)
+		if collided:
+			self.callback(**self.callbackarguments)
 		return collided
 
-	def translate()
+	def translate(self, dx, dy, dz):
+		[obj.translate(dx, dy, dz) for obj in self.objects]
+		return self
+
+	def translateVector(self, vector):
+		return self.translate(vector.x, vector.y, vector.z)
+
+	def rotate(self, dx, dy, dz, centerPoint=None):
+		[obj.rotate(dx, dy, dz, centerPoint) for obj in self.objects]
+		return self
+
+	def rotateVector(self, vector, centerPoint=None):
+		return self.rotate(vector.x, vector.y, vector.z, centerPoint=None)
+
+	def applyLinearForce(self, dx, dy, dz):
+		[obj.applyLinearForce(dx, dy, dz) for obj in self.objects]
+		return self
+
+	def applyLinearForceVector(self, vector):
+		[obj.applyLinearForce(vector.x, vector.y, vector.z) for obj in self.objects]
+		return self
+
+	def applyAngularForce(self, dx, dy, dz):
+		[obj.applyAngularForce(dx, dy, dz) for obj in self.objects]
+		return self
+
+	def applyAngularForceVector(self, vector):
+		[obj.applyAngularForce(vector.x, vector.y, vector.z) for obj in self.objects]
+		return self
+
+	def applyForce(self, linear, angular):
+		self.applyLinearForceVector(linear)
+		self.applyAngularForceVector(angular)
+		return self
