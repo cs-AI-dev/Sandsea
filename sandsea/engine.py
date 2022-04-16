@@ -110,7 +110,6 @@ class Asset:
 		else:
 			raise StopIteration
 		return out
-<<<<<<< Updated upstream
 
 	def checkCollision(self, object):
 		positiveObjects = []
@@ -124,9 +123,6 @@ class Asset:
 				return True
 		return False
 
-=======
-
->>>>>>> Stashed changes
 	def setParentSimulation(self, parentSimulation):
 		try:
 			self.parentSimulation = parentSimulation
@@ -168,9 +164,15 @@ METHODS
 		self.simulationTime = 0
 		self.assets = assets
 		self.objects = []
-		[self.objects += asset.objects for asset in self.assets]
+		for asset in self.assets:
+			for object in asset.objects:
+				self.objects.append(object)
 		self.points = []
-		[self.points += [[x for x in iter(obj)] for obj in asset] for asset in self.assets]
+		# [self.points += [[x for x in iter(obj)] for obj in asset] for asset in self.assets]
+		for asset in self.assets:
+			for obj in asset:
+				for x in iter(obj):
+					self.points.append(x)
 		self.centroid = objects.Point(
 			sum([p.x for p in self.points]) / len(self.points),
 			sum([p.y for p in self.points]) / len(self.points),
@@ -220,7 +222,7 @@ METHODS
 		elif setting in ["realWeeks", "rw"]:
 			return runUntilTimestamp(time.time() + (604800 * time))
 		elif setting in ["simulatedSeconds", "ss"]:
-			for x in range(time * self.properties.tickRate)): self.tick()
+			for x in range(time * self.properties.tickRate): self.tick()
 			return self.objects
 		elif setting in ["simulatedMinutes" "sm"]:
 			for x in range(time * self.properties.tickRate * 60): self.tick()
