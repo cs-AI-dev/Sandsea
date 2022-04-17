@@ -993,6 +993,9 @@ class TriangularPyramid:
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
 
+class RectangularPyramid:
+	
+
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
 		self.triangles = triangles
@@ -1323,3 +1326,6 @@ class ContactTrigger:
 		self.applyLinearForceVector(linear)
 		self.applyAngularForceVector(angular)
 		return self
+
+	def call(self):
+		return self.callback(**self.callbackarguments)
