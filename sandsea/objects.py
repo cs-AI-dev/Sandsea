@@ -327,10 +327,7 @@ def raycastCollision(point, *triangles):
 	collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
 	hits = 0
 	for tri in triangles:
-		if tri.checkCollision(collisionLine) \
-		and tri.point1.x < object.x \
-		and tri.point2.x < object.x \
-		and tri.point3.x < object.x:
+		if tri.checkCollision(collisionLine) and tri.point1.x < object.x and tri.point2.x < object.x and tri.point3.x < object.x:
 			hits += 1
 	return hits % 2 == 1
 
@@ -611,6 +608,9 @@ class Block:
 			       self.close_top_right,
 			       self.far_top_right
 			      ]
+		self.point1, self.point2, self.point3, self.point4, self.point5, self.point6, self.point7, self.point8 = self.p1, self.p2, self.p3, self.p4, self.p5, self.p6, self.p7, self.p8 = \
+		self.close_bottom_left,self.far_bottom_left, self.close_top_left,self.far_top_left, self.close_bottom_right, self.far_bottom_right, self.close_top_right, self.far_top_right
+		
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
@@ -994,7 +994,7 @@ class TriangularPyramid:
 		return self
 
 class RectangularPyramid:
-	
+
 
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
