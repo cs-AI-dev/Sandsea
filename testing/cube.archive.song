@@ -1,0 +1,15 @@
+Declares eight points, p1-8.
+$ start ;
+declare point p1 at 0 0 0 ;
+declare point p2 at 0 0 1 ;
+declare point p3 at 0 1 0 ;
+declare point p4 at 0 1 1 ;
+declare point p5 at 1 0 0 ;
+declare point p6 at 1 0 1 ;
+declare point p7 at 1 1 0 ;
+declare point p8 at 1 1 1 ;
+$ end ;
+Declares block b1 around the previous eight points.
+$ start ;
+declare block b1 with points { p1 p2 p3 p4 p5 p6 p7 p8 } material Simulant at 0 0 0 ;
+$ end ;
