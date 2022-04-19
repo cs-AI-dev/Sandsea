@@ -610,7 +610,7 @@ class Block:
 			      ]
 		self.point1, self.point2, self.point3, self.point4, self.point5, self.point6, self.point7, self.point8 = self.p1, self.p2, self.p3, self.p4, self.p5, self.p6, self.p7, self.p8 = \
 		self.close_bottom_left,self.far_bottom_left, self.close_top_left,self.far_top_left, self.close_bottom_right, self.far_bottom_right, self.close_top_right, self.far_top_right
-		
+
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
@@ -992,9 +992,6 @@ class TriangularPyramid:
 		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
-
-class RectangularPyramid:
-
 
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
