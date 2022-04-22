@@ -412,7 +412,7 @@ class Line:
 				return resultSegmentPoint1.distance(resultSegmentPoint2) < setting["lowerCollisionThreshold"]
 			
 class LineCTX:
-	def __init__(self, point1, arg2):
+	def __init__(self, point1, arg2, toggle=True):
 		if type(arg2) == type(Vector(0, 0, 0)):
 			self.point2 = Point(point.x + arg2.x, point.y + arg2.y, point.z + arg2.z)
 			self.vector = arg2
@@ -422,6 +422,24 @@ class LineCTX:
 		else:
 			raise TypeError("Line arguments must be Point and Vector or Point and Point, not " + str(type(arg2)).split("\'")[1] + ".")
 		self.line = Line(point1, point2)
+		self.plist = [self.point1, self.point2, self.vector]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.line
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 def raycastCollision(point, *triangles):
 	collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
@@ -578,6 +596,28 @@ class Triangle:
 				return True
 
 			return False
+		
+class TriangleCTX:
+	def __init__(self, p1, p2, p3, toggle=True):
+		self.triangle = Triangle(p1, p2, p3)
+		self.plist = [p1, p2, p3]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.triangle
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Sphere:
 	def __init__(self, center, radius):
@@ -634,6 +674,21 @@ class Sphere:
 			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
 
 			return collided
+		
+class SphereCTX:
+	def __init__(self, center, radius):
+		self.sphere = Sphere(center, radius)
+	
+	def __enter__(self):
+		return self.sphere
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Cuboid:
 	def __init__(self, corner1, arg2):
@@ -658,7 +713,15 @@ class Cuboid:
 			self.far_bottom_right = Point(corner1.x + arg2.x, corner1.y, corner1.z + arg2.z)
 			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
 			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
-
+		self.points = [self.close_bottom_left,
+			       self.far_bottom_left,
+			       self.close_top_left,
+			       self.far_top_left,
+			       self.close_bottom_right,
+			       self.far_bottom_right,
+			       self.close_top_right,
+			       self.far_top_right
+			      ]
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
@@ -718,6 +781,28 @@ class Cuboid:
 			collided = collided or self.checkCollision(object.point2)
 			collided = collided or self.checkCollision(object.point3)
 			return collided
+		
+class CuboidCTX:
+	def __init__(corner1, arg2, toggle=True):
+		self.cuboid = Cuboid(corner1, arg2)
+		self.plist = self.cuboid.points
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.cuboid
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Block:
 	def __init__(self, corner1, arg2, material, isNegative):
@@ -882,6 +967,28 @@ class Block:
 		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
+	
+class BlockCTX:
+	def __init__(self, corner1, arg2, toggle=True):
+		self.block = Block(corner1, arg2)
+		self.plist = block.points
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.block
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Ball:
 	def __init__(self, center, radius, material, isNegative):
@@ -1180,6 +1287,28 @@ class TriangularPyramid:
 		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
+	
+class TriangularPyramidCTX:
+	def __init__(self, p1, p2, p3, v, toggle=True):
+		self.pyramid = TriangularPyramid(p1, p2, p3, v)
+		self.plist = [p1, p2, p3, v]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.pyramid
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
