@@ -3,17 +3,23 @@ import engine
 import gui
 
 def interpretText(text, parsingSandsongInitialTextSend=True, mode=None):
-	if parsingSandsongInitialTextSend: 
+	if parsingSandsongInitialTextSend:
 		gui.log("Parsing Sandsong ...")
-	
+
 	if mode == None:
 		return False
-	if mode == 0:
-		
-		
+	elif mode == 0:
+
+	elif mode == 1:
+
+	elif mode == 2:
+
+	else:
+		return False
+
 def interpretFile(filedir):
 	gui.log("Loading file to parse ...")
-	if len(filedir.split(".")) == 3 and filedir.split(".")[2] == in ["song", "sandsong"] 
+	if len(filedir.split(".")) == 3 and filedir.split(".")[2] == in ["song", "sandsong"]
 	with open(filedir, "r") as f:
 		gui.log("    ┣━ done.")
 		gui.log("    ┗━ Beginning parse ...")
@@ -27,4 +33,4 @@ def interpretFile(filedir):
 		else:
 			gui.log("Invalid file format.")
 			return False
-		interpretText(f.read(), parsingSandsongInitialTextSend=False)
+		interpretText(f.read(), parsingSandsongInitialTextSend=False, t)
