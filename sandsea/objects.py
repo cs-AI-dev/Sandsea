@@ -33,6 +33,17 @@ class Vector:
 
 	def __iter__(self):
 		return [self.x, self.y, self.z]
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def addVector(self, vector):
 		self.x = self.x + vector.x
@@ -144,6 +155,17 @@ class Point:
 
 	def __iter__(self):
 		return [self.x, self.y, self.z]
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.x += dx
@@ -207,6 +229,28 @@ class Point:
 			# vec3 P = B + t * d
 			# return P.distance(A)
 			pass
+		
+class PointCTX:
+	def __init__(self, x, y, z, toggle=True):
+		self.point = Point(x, y, z)
+		self.colist = [x, y, z]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if toggle:
+			return self.point
+		elif not toggle:
+			return self.colist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Angle:
 	def __init__(self, center, endp1, endp2):
@@ -222,6 +266,17 @@ class Angle:
 
 		self.angle = math.acos((ep1.x * ep2.x + ep1.y * ep2.y + ep1.z * ep2.z) / (sqrt((ep1.x ** 2) + (ep1.y ** 2) + (ep1.z ** 2)) * math.sqrt((ep2.x ** 2) + (ep2.y ** 2) + (ep2.z ** 2))))
 
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
+	
 	def translate(self, dx, dy, dz):
 		self.__init__(self.center.translate(dx, dy, dz), self.endpoint1.translate(dx, dy, dz), self.endpoint2.translate(dx, dy, dz))
 		return self
@@ -235,7 +290,29 @@ class Angle:
 
 	def rotateVector(self, vector, centerPoint=None):
 		self.rotate(vector.x, vector.y, vector.z, centerPoint)
-
+		
+class AngleCTX:
+	def __init__(self, center, endp1, endp2, toggle=True):
+		self.angle = Angle(center, endp1, endp2)
+		self.angleList = [endp1, center, endp2]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.angle
+		elif not self.toggle:
+			return self.angleList
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
+		
 class Line:
 	def __init__(self, point1, arg2):
 		self.point1 = point
@@ -260,6 +337,17 @@ class Line:
 
 		self.directionalVector = Vector(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z)
 
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
+	
 	def translate(self, dx, dy, dz):
 		self.__init__(origin.translate(dx, dy, dz), self.pointOnRay.translate(dx, dy, dz))
 		return self
@@ -322,6 +410,36 @@ class Line:
 				resultSegmentPoint2.addz(p3.z + mub * p43.z)
 
 				return resultSegmentPoint1.distance(resultSegmentPoint2) < setting["lowerCollisionThreshold"]
+			
+class LineCTX:
+	def __init__(self, point1, arg2, toggle=True):
+		if type(arg2) == type(Vector(0, 0, 0)):
+			self.point2 = Point(point.x + arg2.x, point.y + arg2.y, point.z + arg2.z)
+			self.vector = arg2
+		elif type(arg2) == type(Point(0, 0, 0)):
+			self.point2 = arg2
+			self.vector = Vector(deltax(point, arg2), deltay(point, arg2), deltaz(point, arg2))
+		else:
+			raise TypeError("Line arguments must be Point and Vector or Point and Point, not " + str(type(arg2)).split("\'")[1] + ".")
+		self.line = Line(point1, point2)
+		self.plist = [self.point1, self.point2, self.vector]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.line
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 def raycastCollision(point, *triangles):
 	collisionLine = Line(object, Point(object.x + 1, object.y, object.z))
@@ -352,6 +470,17 @@ class Ray:
 		self.slope_xz = (self.point2.x - self.point1.x) / (self.point2.z - self.point1.z)
 		self.slope = self.slope_yx + self.slope_zy + self.slope_zx
 
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
+		
 	def translate(self, dx, dy, dz):
 		self.__init__(origin.translate(dx, dy, dz), self.pointOnRay.translate(dx, dy, dz))
 		return self
@@ -389,6 +518,17 @@ class Triangle:
 
 	def __iter__(self):
 		return [self.point1, self.point2, self.point3]
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.__init__(self.point1.translate(dx, dy, dz), self.point2.translate(dx, dy, dz), self.point3.translate(dx, dy, dz))
@@ -456,6 +596,28 @@ class Triangle:
 				return True
 
 			return False
+		
+class TriangleCTX:
+	def __init__(self, p1, p2, p3, toggle=True):
+		self.triangle = Triangle(p1, p2, p3)
+		self.plist = [p1, p2, p3]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.triangle
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Sphere:
 	def __init__(self, center, radius):
@@ -467,6 +629,17 @@ class Sphere:
 		elif type(radius) == type(Point(0, 0, 0)):
 			self.radius = self.center.distance(radius)
 			self.tangentPoint = radius
+			
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
@@ -501,6 +674,21 @@ class Sphere:
 			collided = collided or (t22.area * 2) / object.point2.distance(object.point3) <= self.radius
 
 			return collided
+		
+class SphereCTX:
+	def __init__(self, center, radius):
+		self.sphere = Sphere(center, radius)
+	
+	def __enter__(self):
+		return self.sphere
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Cuboid:
 	def __init__(self, corner1, arg2):
@@ -525,7 +713,15 @@ class Cuboid:
 			self.far_bottom_right = Point(corner1.x + arg2.x, corner1.y, corner1.z + arg2.z)
 			self.close_top_right = Point(corner1.x, corner1.y + arg2.y, corner1.z + arg2.z)
 			self.far_top_right = Point(corner1.x + arg2.x, corner1.y + arg2.y, corner1.z + arg2.z)
-
+		self.points = [self.close_bottom_left,
+			       self.far_bottom_left,
+			       self.close_top_left,
+			       self.far_top_left,
+			       self.close_bottom_right,
+			       self.far_bottom_right,
+			       self.close_top_right,
+			       self.far_top_right
+			      ]
 		self.volume = self.close_bottom_left.distance(self.close_bottom_right)
 		self.volume *= self.close_bottom_left.distance(self.close_top_left)
 		self.volume *= self.close_bottom_left.distance(self.far_bottom_left)
@@ -543,6 +739,17 @@ class Cuboid:
 				self.close_top_right,
 				self.far_top_right
 		]
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.__init__(self.close_bottom_left.translate(dx, dy, dz), self.far_top_right.translate(dx, dy, dz))
@@ -574,6 +781,28 @@ class Cuboid:
 			collided = collided or self.checkCollision(object.point2)
 			collided = collided or self.checkCollision(object.point3)
 			return collided
+		
+class CuboidCTX:
+	def __init__(corner1, arg2, toggle=True):
+		self.cuboid = Cuboid(corner1, arg2)
+		self.plist = self.cuboid.points
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.cuboid
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Block:
 	def __init__(self, corner1, arg2, material, isNegative):
@@ -640,6 +869,17 @@ class Block:
 				self.close_top_right,
 				self.far_top_right
 		]
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def recalculate(self, corner1, corner2):
 		self.close_bottom_left = Point(corner1.x, corner1.y, corner1.z)
@@ -727,6 +967,28 @@ class Block:
 		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
+	
+class BlockCTX:
+	def __init__(self, corner1, arg2, toggle=True):
+		self.block = Block(corner1, arg2)
+		self.plist = block.points
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.block
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class Ball:
 	def __init__(self, center, radius, material, isNegative):
@@ -748,6 +1010,17 @@ class Ball:
 		self.centerOfMass = self.center
 
 		self.links = []
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
@@ -832,6 +1105,17 @@ class Cylinder:
 		self.rotationVector = Vector(0, 0, 0)
 
 		self.links = []
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.center.translate(dx, dy, dz)
@@ -933,6 +1217,17 @@ class TriangularPyramid:
 
 	def __next__(self):
 		pass
+	
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.__init__(self.point_base1.translate(dx, dy, dz), self.point_base2.translate(dx, dy, dz), self.point_base3.translate(dx, dy, dz), self.point_vertex.translate(dx, dy, dz), self.material)
@@ -992,6 +1287,28 @@ class TriangularPyramid:
 		[link.propagateEffect(self, 2, linearForce.x, linearForce.y, linearForce.z) for link in self.links]
 		[link.propagateEffect(self, 3, angularForce.x, angularForce.y, angularForce.z) for link in self.links]
 		return self
+	
+class TriangularPyramidCTX:
+	def __init__(self, p1, p2, p3, v, toggle=True):
+		self.pyramid = TriangularPyramid(p1, p2, p3, v)
+		self.plist = [p1, p2, p3, v]
+		self.toggle = toggle
+		
+	def __enter__(self):
+		if self.toggle:
+			return self.pyramid
+		elif not self.toggle:
+			return self.plist
+		else:
+			raise IndexError("Toggle must be a Boolean.")
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 class ConvexLowpoly:
 	def __init__(self, material, *triangles):
@@ -1016,6 +1333,17 @@ class ConvexLowpoly:
 		self.angularMovement = Vector(0, 0, 0)
 
 		self.links = []
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
@@ -1085,6 +1413,17 @@ class ConcaveLowpoly:
 		self.angularMovement = Vector(0, 0, 0)
 
 		self.links = []
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		[tri.translate(dx, dy, dz) for tri in self.triangles]
@@ -1169,6 +1508,17 @@ class Custom:
 		self.rotation = Vector(0, 0, 0)
 
 		self.links = []
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def translate(self, dx, dy, dz):
 		self.coordinates.translate(dx, dy, dz)
@@ -1247,6 +1597,17 @@ class Link:
 		self.rotationEnabled = rotation
 		self.linearForceEnabled = linearForce
 		self.angularForceEnabled = angularForce
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def propagateEffect(self, affectedObject, effectType, dx, dy, dz, centerPoint):
 		try:
@@ -1272,6 +1633,17 @@ class ContactTrigger:
 		self.callback = callback
 		self.callbackarguments = callbackarggenerators
 		self.objects = objects
+		
+	def __enter__(self):
+		return self
+		
+	def __exit__(self, exc_type, exc_value, exc_tb):
+		try:
+		    raise exc_type(exc_value)
+		except TypeError:
+		    pass
+		except Exception as e:
+		    raise e
 
 	def add(self, object):
 		self.objects.append(object)
