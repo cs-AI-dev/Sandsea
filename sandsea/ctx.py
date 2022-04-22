@@ -8,6 +8,15 @@ class SpaceObject:
 	def set(self, x, y, z, val):
 		self.space[x][y][z] = val
 		return self.space
+	
+	def translate(self, ox, oy, oz, dx, dy, dz):
+		val = self.space[ox][oy][oz]
+		self.space[ox][oy][oz] = None
+		self.space[ox + dx][oy + dy][oz + dz] = val
+		return self.space
+	
+	def rotate(self, ox, oy, oz, dx, dy, dz, centerPoint):
+		return self.space
 
 class Space:
 	def __init__(self, dimensionx, dimensiony=None, dimensionz=None):
